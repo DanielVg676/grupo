@@ -1,5 +1,6 @@
 import turtle
-import os
+import time  # módulo para manejar el tiempo
+
 
 class JuegoGato:
 
@@ -15,7 +16,6 @@ class JuegoGato:
         ]
 
     def __init__(self, tortuga=None):
-        self.archivo_log = self.crear_nombre_archivo()
         if tortuga is None:
             self.t = turtle.Turtle()
         else:
@@ -23,8 +23,11 @@ class JuegoGato:
 
         self.jugador1 = "         "
         self.jugador2 = "         "
+        
         self.ventana = turtle.Screen()
         self.ventana.setup(width=600, height=600)
+        timestamp = time.strftime("%Y%m%d-%H%M%S")  # Obtener marca de tiempo
+        self.archivo = open(f"escribiendo_{timestamp}.txt", "a+")  # Usar la marca de tiempo en el nombre del archivo
         self.ventana.title("Juego del Gato")
         self.ventana.bgcolor("black")
         
@@ -94,6 +97,7 @@ class JuegoGato:
         self.jugada(seccion)
 
     def convertir_coordenadas_a_seccion(self, x, y):
+        # Mapear las coordenadas a secciones del tablero
         if -300 < x < -100:
             col = 1
         elif -100 < x < 100:
@@ -131,47 +135,44 @@ class JuegoGato:
             x, y = coordenadas[seccion]
             fila = (seccion - 1) // 3
             columna = (seccion - 1) % 3
-            if self.tablero[fila][columna] == '':
+            if self.tablero[fila][columna] == '': 
                 self.t.penup()
                 self.t.goto(x, y)
                 self.t.pendown()
                 
-                with open(self.archivo_log, 'a') as f:        ######
-                    old_stdout = sys.stdout
-                    sys.stdout = f
+                if self.turno % 2 == 0:
+                    self.crear_circulo(x, y, 50)  # Dibuja un círculo
+                    self.tablero[fila][columna] = "O"
 
-                    if self.turno % 2 == 0:
-                        self.crear_circulo(x, y, 50)  # Dibuja un círculo
-                        self.tablero[fila][columna] = 'O'
-                        self.jugador1 = self.jugador1[:seccion-1] + "O" + self.jugador1[seccion:]
-                    else:
-                        self.crear_tacha(x, y)  # Dibuja una tacha
-                        self.tablero[fila][columna] = 'X'
-                        self.jugador2 = self.jugador2[:seccion-1] + "X" + self.jugador2[seccion:]
+                    self.jugador1 = self.jugador1[:seccion-1] + "O" + self.jugador1[seccion:]   # Insertar aqui los el control de co
+                    self.archivo.write(f"Jugador 1: {self.jugador1}\n")
+                else:
+                    self.crear_tacha(x, y)  # Dibuja una tacha
+                    self.tablero[fila][columna] = "X"
+                    self.jugador2 = self.jugador2[:seccion-1] + "X" + self.jugador2[seccion:]     # Insertar aqui los el control de co
+                    self.archivo.write(f"Jugador 2: {self.jugador2}\n")
 
-                    self.turno += 1
-                    print(self.jugador1)
-                    print(self.jugador2)
-                    if not self.nohayganador():
-                        self.ventana.bye()
-
-                    sys.stdout = old_stdout
-
+                self.turno += 1
+                print(self.jugador1)
+                print(self.jugador2)
+                if not self.nohayganador():
+                    self.ventana.bye()
             else:
                 print("Sección ya ocupada. Elija otra sección.")
         else:
             print("Sección inválida. Por favor, ingrese un número entre 1 y 9.")
 
     def nohayganador(self):
-        if self.jugador1 in self.ganador:
+        if self.jugador1 in self.ganador:  #Compruebar si son iguales las figuras colocadas en [0], [1], [2] y si no estan vacias
             print("jugador1 gano")
         for fila in self.tablero:
             if fila[0] == fila[1] == fila[2] != '':
                 print(f"El jugador {fila[0]} ha ganado!")
+
                 return False
 
         for col in range(3):
-            if self.tablero[0][col] == self.tablero[1][col] == self.tablero[2][col] != '':
+            if self.tablero[0][col] == self.tablero[1][col] == self.tablero[2][col] != '': 
                 print(f"El jugador {self.tablero[0][col]} ha ganado!")
                 return False
 
@@ -195,12 +196,6 @@ class JuegoGato:
             return False
 
         return True
-
-    def crear_nombre_archivo(self):
-        numero = 1
-        while os.path.exists(f"juego_gato_{numero}.txt"):
-            numero += 1
-        return f"juego_gato_{numero}.txt"
 
 if __name__ == "__main__":
     juego = JuegoGato()
