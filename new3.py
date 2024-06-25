@@ -1,6 +1,5 @@
 import turtle
-import time  # módulo para manejar el tiempo
-
+import time
 
 class JuegoGato:
 
@@ -13,7 +12,7 @@ class JuegoGato:
         ["  x  x  x"],
         ["x   x   x"],
         ["  x x x  "],
-        ]
+    ]
 
     def __init__(self, tortuga=None):
         if tortuga is None:
@@ -25,7 +24,7 @@ class JuegoGato:
         self.jugador2 = "         "
         
         self.ventana = turtle.Screen()
-        self.ventana.setup(width=600, height=600)
+        self.ventana.setup(width=650, height=900)
         timestamp = time.strftime("%Y%m%d-%H%M%S")  # Obtener marca de tiempo
         self.archivo = open(f"escribiendo_{timestamp}.txt", "a+")  # Usar la marca de tiempo en el nombre del archivo
         self.ventana.title("Juego del Gato")
@@ -35,6 +34,9 @@ class JuegoGato:
         self.tablero = [['' for _ in range(3)] for _ in range(3)]  # Matriz para el REGISTRO DE MOVIMIENTOS Y ASIGNACION 
 
         self.crear_tablero()
+        self.botonera()
+        self.espectacular()
+        self.ventana.onscreenclick(self.convertir_coordenadas_a_seccion)
         self.ventana.onscreenclick(self.detectar_click)
         self.ventana.mainloop()
 
@@ -92,12 +94,12 @@ class JuegoGato:
         self.t.penup()
         self.t.setheading(0)
 
-    def detectar_click(self, x, y):
-        seccion = self.convertir_coordenadas_a_seccion(x, y)
-        self.jugada(seccion)
-
     def convertir_coordenadas_a_seccion(self, x, y):
         # Mapear las coordenadas a secciones del tablero
+        if -100 < x < 100 and -410 < y < -360:
+            self.cerrar_ventana()
+            print("¡Muchas gracias por jugar!")
+
         if -300 < x < -100:
             col = 1
         elif -100 < x < 100:
@@ -108,15 +110,19 @@ class JuegoGato:
             return None
 
         if 100 < y < 300:
-            row = 1
+            fila = 1
         elif -100 < y < 100:
-            row = 2
+            fila = 2
         elif -300 < y < -100:
-            row = 3
+            fila = 3
         else:
             return None
 
-        return (row - 1) * 3 + col
+        return (fila - 1) * 3 + col
+
+    def detectar_click(self, x, y):
+        seccion = self.convertir_coordenadas_a_seccion(x, y)
+        self.jugada(seccion)
 
     def jugada(self, seccion):
         coordenadas = {
@@ -163,12 +169,13 @@ class JuegoGato:
             print("Sección inválida. Por favor, ingrese un número entre 1 y 9.")
 
     def nohayganador(self):
-        if self.jugador1 in self.ganador:  #Compruebar si son iguales las figuras colocadas en [0], [1], [2] y si no estan vacias
+        if self.jugador1 in self.ganador:  # Comprueba si hay una línea ganadora
             print("jugador1 gano")
+            return False
+
         for fila in self.tablero:
             if fila[0] == fila[1] == fila[2] != '':
                 print(f"El jugador {fila[0]} ha ganado!")
-
                 return False
 
         for col in range(3):
@@ -197,5 +204,37 @@ class JuegoGato:
 
         return True
 
+    def botonera(self):
+        self.t.penup()
+        self.t.goto(100, -360)
+        self.t.pendown()
+        self.t.color("red")
+        self.t.begin_fill()
+        self.t.forward(50)
+        self.t.right(90)
+        self.t.forward(200)
+        self.t.right(90)
+        self.t.forward(50)
+        self.t.right(90)
+        self.t.forward(200)
+        self.t.end_fill()
+        self.t.penup()
+        self.t.goto(25, -398)
+        self.t.right(180)
+        self.t.down()
+        self.t.color("white")
+        self.t.write('EXIT', align="RIGHT", font=("Arial", 16, "bold"))
+        self.t.penup()
+
+    def espectacular(self):
+        self.t.goto(0, 350)
+        self.t.pendown()
+        self.t.write('Juego del Gato', align="center", font=("Arial", 48, "bold"))
+        self.t.penup()
+
+    def accionBoton(self, x, y):
+        if -100 < x < 100 and -410 < y < -360:
+            self.cerrar_ventana()
+            print("¡Muchas gracias por jugar!")
 
 juego = JuegoGato()
